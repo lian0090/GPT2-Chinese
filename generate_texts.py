@@ -56,6 +56,10 @@ def top_k_top_p_filtering(logits, top_k=0, top_p=0.0, filter_value=-float('Inf')
         logits[indices_to_remove] = filter_value
 
     if top_p > 0.0:
+        # probability arranged from large to small. At first, the cumsum will always be smaller than p, 
+        # and getting larger and larger, and finally will surpass p at a point a. 
+        # the ones below point a will all be larger than p,（cumsum becomes larger，but individual probailities gets smaller.）
+        # these small probabilities are no longer needed, because there are enough of them already. 
         sorted_logits, sorted_indices = torch.sort(logits, descending=True)
         cumulative_probs = torch.cumsum(F.softmax(sorted_logits, dim=-1), dim=-1)
 
